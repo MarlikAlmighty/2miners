@@ -1,0 +1,823 @@
+swagger: '2.0'
+info:
+  title: 2miners API
+  description: Rest API for 2miners.com
+  version: 1.0.0
+  contact:
+    email: cryptocoin62@gmail.com
+schemes:
+  - http
+consumes:
+  - "application/json; charset=utf-8"
+produces:
+  - "application/json; charset=utf-8"
+paths:
+  /:
+    get:
+      tags:
+        - home
+      summary: Root of project
+      operationId: home
+      produces:
+        - "text/html"
+      responses:
+        '200':
+          description: OK
+  /address:
+    post:
+      tags:
+        - address
+      summary: Add address
+      operationId: adrr_add
+      consumes:
+        - "application/json; charset=utf-8"
+      produces:
+        - "application/json; charset=utf-8"
+      parameters:
+        - in: body
+          name: add
+          required: true
+          schema:
+            $ref: "#/definitions/Addr"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+    put:
+      tags:
+        - address
+      summary: Update an existing address
+      operationId: addr_update
+      consumes:
+        - "application/json; charset=utf-8"
+      produces:
+        - "application/json; charset=utf-8"
+      parameters:
+        - in: body
+          name: update
+          required: true
+          schema:
+            $ref: "#/definitions/Addr"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+    delete:
+      tags:
+        - address
+      summary: Delete address
+      operationId: addr_delete
+      parameters:
+        - in: body
+          name: delete
+          required: true
+          schema:
+            $ref: "#/definitions/Addr"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+  /address/stats:
+    post:
+      tags:
+        - address
+      summary: Get stats of address
+      operationId: addr_get_stats
+      parameters:
+        - in: body
+          name: stats
+          required: true
+          schema:
+            $ref: "#/definitions/Addr"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/StatsAddr"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+  /address/state:
+    post:
+      tags:
+        - address
+      summary: Get one address
+      operationId: addr_get_state
+      parameters:
+        - in: body
+          name: state
+          required: true
+          schema:
+            $ref: "#/definitions/Addr"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/Addr"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+  /account:
+    get:
+      tags:
+        - account
+      summary: Show user account
+      operationId: account_profile
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/User"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+    delete:
+      tags:
+        - account
+      summary: Delete account
+      operationId: account_delete
+      parameters:
+        - in: body
+          name: delete
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+
+  /account/register:
+    post:
+      tags:
+        - account
+      summary: Send to email link
+      operationId: account_register
+      consumes:
+        - "application/json; charset=utf-8"
+      produces:
+        - "application/json; charset=utf-8"
+      parameters:
+        - in: body
+          name: register
+          required: true
+          schema:
+            $ref: "#/definitions/FormLoginPassword"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+
+  /account/login:
+    post:
+      tags:
+        - account
+      summary: Check login and password
+      operationId: account_login
+      consumes:
+        - "application/json; charset=utf-8"
+      produces:
+        - "application/json; charset=utf-8"
+      parameters:
+        - in: body
+          name: checklogin
+          required: true
+          schema:
+            $ref: "#/definitions/FormLoginPassword"
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '401':
+          description: Status Unauthorized
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+
+  /account/exit:
+    get:
+      tags:
+        - account
+      summary: Clear cookie
+      operationId: account_exit
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+        '400':
+          description: Bad request
+          schema:
+            $ref: "#/definitions/ExceptionModel"
+
+  /account/verify/{token}:
+    get:
+      tags:
+        - account
+      summary: Verify account
+      operationId: account_verify
+      produces:
+        - "text/html"
+      parameters:
+        - in: path
+          name: token
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          
+definitions:
+    Users:
+      type: array
+      items:
+        $ref: "#/definitions/User"
+    User:
+      type: object
+      properties:
+        Uid:
+          type: string
+        Email:
+          type: string
+        Pass:
+          type: string
+        Root:
+          type: boolean
+        Banned:
+          type: boolean
+        Data:
+          type: array
+          items:
+            $ref: "#/definitions/Addr"
+    Address:
+      type: array
+      items:
+        $ref: "#/definitions/Addr"
+    Addr:
+      type: object
+      properties:
+        Id:
+          type: integer
+          format: int64
+        Pool:
+          type: string
+          minLength: 1
+        Addr:
+          type: string
+          minLength: 1
+        Notify:
+          type: integer
+          format: int64
+        Block:
+          type: integer
+          format: int64
+        MonitorBlock:
+          type: boolean
+          x-nullable: true
+        MonitorAddr:
+          type: boolean
+          x-nullable: true
+    FormLoginPassword:
+      type: object
+      properties:
+        Login:
+          type: string
+        Password:
+          type: string
+    StatsAddr:
+      type: object
+      properties:
+        Balance:
+          type: string
+        Immature:
+          type: string
+        Payed:
+          type: string
+        SumRewards:
+          type: array
+          items:
+            $ref: "#/definitions/SumRewards"
+        Workers:
+          type: array
+          items:
+            $ref: "#/definitions/Worker"
+        HashRate:
+          type: string
+        CurrentHashRate:
+          type: string
+        CurrentLuck:
+          type: string
+        LastBlockFound:
+          type: integer
+          format: int64
+    SumRewards:
+      type: object
+      properties:
+        Reward:
+          type: string
+        Name:
+          type: string
+    Worker:
+      type: object
+      properties:
+        LastBeat:
+          type: string
+        HR:
+          type: string
+        Name:
+          type: string
+    ExceptionModel:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        description:
+          type: string
+      xml:
+        name: ExceptionModel
+    PaymentReturnModel:
+      type: object
+      properties:
+        payments:
+          type: array
+          items:
+            $ref: "#/definitions/PaymentsModel"
+        paymentsTotal:
+          type: integer
+          format: int64
+      xml:
+        name: PaymentReturnModel
+    StatsReturnModel:
+      type: object
+      properties:
+        candidatesTotal:
+          type: integer
+          format: int64
+        hashrate:
+          type: number
+          format: float
+        immatureTotal:
+          type: integer
+          format: int64
+        luck:
+          type: number
+          format: float
+        maturedTotal:
+          type: integer
+          format: int64
+        minersTotal:
+          type: integer
+          format: int64
+        nodes:
+          type: array
+          items:
+            $ref: "#/definitions/NodeModel"
+        now:
+          type: integer
+          format: int64
+        paymentsTotal:
+          type: integer
+          format: int64
+        poolCharts:
+          type: array
+          items:
+            $ref: "#/definitions/PoolChartsModel"
+        stats:
+          type: object
+          properties:
+            lastBlockFound:
+              type: integer
+              format: int64
+            roundShares:
+              type: number
+              format: float
+            nshares:
+              type: integer
+              format: int64
+      xml:
+        name: StatsReturnModel
+    SumrewardsModel:
+      type: object
+      properties:
+        inverval:
+          type: integer
+          format: int64
+        reward:
+          type: integer
+          format: int64
+        numreward:
+          type: integer
+          format: int64
+        name:
+          type: string
+        offset:
+          type: integer
+          format: int64
+    WorkerGroupModel:
+      type: object
+      properties:
+        lastBeat:
+          type: integer
+          format: int64
+        hr:
+          type: number
+          format: float
+        offline:
+          type: boolean
+          default: false
+        hr2:
+          type: number
+          format: float
+
+    WorkerGroupModel2:
+      type: object
+      properties:
+        lastBeat:
+          type: integer
+          format: int64
+        hr:
+          type: number
+          format: float32
+        offline:
+          type: boolean
+          default: false
+        bits:
+          type: integer
+          format: int
+        hr2:
+          type: number
+          format: float64
+
+    AccountReturnModel:
+      type: object
+      properties:
+        currentHashrate:
+          type: number
+          format: float
+        currentLuck:
+          type: string
+        hashrate:
+          type: number
+          format: float
+        pageSize:
+          type: integer
+          format: int64
+        payments:
+          type: array
+          items:
+            $ref: "#/definitions/PaymentModel"
+        paymentsTotal:
+          type: integer
+          format: int64
+        rewards:
+          type: array
+          items:
+            $ref: "#/definitions/RewardsModel"
+        roundShares:
+          type: integer
+          format: int64
+        shares:
+          type: array
+          items:
+            type: string
+        stats:
+          $ref: "#/definitions/StatsModel"
+        sumrewards:
+          type: array
+          items:
+            $ref: "#/definitions/SumrewardsModel"
+        workers:
+          type: object
+          additionalProperties:
+            $ref: "#/definitions/WorkerGroupModel"
+        workersOffline:
+          type: integer
+          format: int64
+        workersOnline:
+          type: integer
+          format: int64
+        workersTotal:
+          type: integer
+          format: int64
+        24hreward:
+          type: integer
+          format: int64
+        24hnumreward:
+          type: integer
+          format: int64
+      xml:
+        name: AccountReturnModel
+    PaymentModel:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        timestamp:
+          type: integer
+          format: int64
+        tx:
+          type: string
+    StatsModel:
+      type: object
+      properties:
+        balance:
+          type: integer
+          format: int64
+        blocksFound:
+          type: integer
+          format: int64
+        immature:
+          type: integer
+          format: int64
+        lastShare:
+          type: integer
+          format: int64
+        paid:
+          type: integer
+          format: int64
+        pending:
+          type: integer
+          format: int64
+    MinerReturnModel:
+      type: object
+      properties:
+        hashrate:
+          type: number
+          format: float
+        miners:
+          $ref: "#/definitions/MinerModel"
+        minersTotal:
+          type: integer
+          format: int64
+        now:
+          type: integer
+          format: int64
+      xml:
+        name: MinerReturnModel
+    MinerModel:
+      type: object
+      properties:
+        minerUid:
+          $ref: "#/definitions/MinerUidModel"
+    NodeModel:
+      type: object
+      properties:
+        avgBlockTime:
+          type: string
+        difficulty:
+          type: string
+        height:
+          type: string
+        lastBeat:
+          type: string
+        name:
+          type: string
+        networkhashps:
+          type: string
+    LuckModel:
+      type: object
+      properties:
+        luckNumber:
+          $ref: "#/definitions/LuckNumberModel"
+    RewardsModel:
+      type: object
+      properties:
+        blockheight:
+          type: integer
+          format: int64
+        timestamp:
+          type: integer
+          format: int64
+        blockhash:
+          type: string
+        reward:
+          type: integer
+          format: int64
+        percent:
+          type: number
+          format: float
+        immature:
+          type: boolean
+          default: false
+        currentLuck:
+          type: number
+          format: float
+        uncle:
+          type: boolean
+          default: false
+    CandidatesModel:
+      type: object
+      properties:
+        height:
+          type: integer
+          format: int64
+        timestamp:
+          type: integer
+          format: int64
+        difficulty:
+          type: number
+          format: float
+        shares:
+          type: number
+          format: float
+        finder:
+          type: string
+        uncle:
+          type: boolean
+          default: false
+        uncleHeight:
+          type: integer
+          format: int64
+        orphan:
+          type: boolean
+          default: false
+        hash:
+          type: string
+        reward:
+          type: integer
+          format: int64
+    ImMaturedModel:
+      type: object
+      properties:
+        height:
+          type: integer
+          format: int64
+        timestamp:
+          type: integer
+          format: int64
+        difficulty:
+          type: number
+          format: float
+        shares:
+          type: number
+          format: float
+        finder:
+          type: string
+        uncle:
+          type: boolean
+          default: false
+        uncleHeight:
+          type: integer
+          format: int64
+        orphan:
+          type: boolean
+          default: false
+        hash:
+          type: string
+        reward:
+          type: integer
+          format: int64
+    MaturedModel:
+      type: object
+      properties:
+        height:
+          type: integer
+          format: int64
+        timestamp:
+          type: integer
+          format: int64
+        difficulty:
+          type: number
+          format: float
+        shares:
+          type: number
+          format: float
+        finder:
+          type: string
+        uncle:
+          type: boolean
+          default: false
+        uncleHeight:
+          type: integer
+          format: int64
+        orphan:
+          type: boolean
+          default: false
+        hash:
+          type: string
+        reward:
+          type: integer
+          format: int64
+    BlockReturnModel:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: "#/definitions/CandidatesModel"
+        candidatesTotal:
+          type: integer
+          format: int64
+        immature:
+          type: array
+          items:
+            $ref: "#/definitions/ImMaturedModel"
+        immatureTotal:
+          type: integer
+          format: int64
+        luck:
+          $ref: "#/definitions/LuckModel"
+        matured:
+          type: array
+          items:
+            $ref: "#/definitions/MaturedModel"
+        maturedTotal:
+          type: integer
+          format: int64
+      xml:
+        name: BlockReturnModel
+    PoolChartsModel:
+      type: object
+      properties:
+        x:
+          type: integer
+          format: int64
+        timeFormat:
+          type: string
+        "y":
+          type: number
+          format: float
+        netdiff:
+          type: number
+          format: float
+        nethr:
+          type: number
+          format: float
+    MinerUidModel:
+      type: object
+      properties:
+        lastBeat:
+          type: integer
+          format: int64
+        height:
+          type: integer
+          format: int64
+        offline:
+          type: boolean
+          default: false
+    PaymentsModel:
+      type: object
+      properties:
+        amount:
+          type: integer
+          format: int64
+        timestamp:
+          type: integer
+          format: int64
+        totalPayees:
+          type: integer
+          format: int64
+        tx:
+          type: string
+    WorkerModel:
+      type: object
+      properties:
+        workerGroup:
+          $ref: "#/definitions/WorkerGroupModel"
+    LuckNumberModel:
+      type: object
+      properties:
+        luck:
+          type: number
+          format: float
+        orphanRate:
+          type: number
+          format: double

@@ -1,0 +1,66 @@
+package main
+
+{{ $name := .Name }}
+{{ $operations := .Operations }}
+
+import (
+
+{{range $index, $op := .Operations}}
+        {{ $found := false }}
+        {{ range $i, $sop := $operations }}
+            {{ if and (gt $i $index ) (eq $op.Package $sop.Package)}}
+                {{ $found = true }}
+            {{end}}
+        {{end}}
+        {{ if not $found }}
+        api{{ pascalize $op.Package }} "{{$op.GenCommon.TargetImportPath}}/{{ $op.RootPackage }}/operations/{{ $op.Package }}"
+        {{end}}
+    {{end}}
+
+	"log"
+	"github.com/go-openapi/loads"
+	"github.com/gorilla/securecookie"
+)
+
+func main() {
+
+	// get the configuration for the app through ENV
+	cnf := config.New()
+	if err := cnf.GetEnv(); err != nil {
+		log.Fatalf("get environment keys error: %v\n", err)
+	}
+
+	// connect to database
+	r, err := store.New()
+	if err != nil {
+		log.Fatalf("open database error: %v\n", err)
+	}
+
+	s := securecookie.New([]byte(cnf.CookieHashKey), []byte(cnf.CookieBlockKey))
+
+    // new app, start app
+    core := app.New(cnf, r, s)
+	go core.Run()
+
+	var swaggerSpec *loads.Document
+
+	if swaggerSpec, err = loads.Analyzed(restapi.SwaggerJSON, ""); err != nil {
+		log.Fatal("loads swagger spec", err)
+	}
+
+    api := operations.New{{ pascalize .Name }}API(swaggerSpec)
+
+	{{range .Operations}}
+        api.{{ pascalize .Package }}{{ pascalize .Name }}Handler = api{{ pascalize .Package }}.{{ pascalize .Name }}HandlerFunc(core.{{ pascalize .Name }}Handler)
+        {{- end}}
+
+    server := {{ .APIPackage }}.NewServer(api)
+
+	server.ConfigureAPI()
+	server.Host = "localhost"
+	server.Port = 8080
+
+	if err = server.Serve(); err != nil {
+		log.Fatalf("start server error: %v\n", err)
+	}
+}
